@@ -1,0 +1,63 @@
+-- ４人が壊れそうな橋を渡ろうとしている。全員橋の同じ側にいる。暗闇の中で懐中電灯は１つしかない。橋は一度に最大２人まで渡ることができ、渡るときは（１人であれ２人であれ）懐中電灯を持っていかなければならない。懐中電灯は必ず持って行くか、持っても戻るかのどちらかでしか移動できないものとする。つまり、投げたりすることはできないとする。人１は橋を渡るのに１分、人２は２分、人３は５分、人４は１０分かかる。また、２人で歩くときは必ず遅い人のペースに合わせて歩くとする。つまり人１と人４が一緒に歩く場合は反対側まで行くのに１０分かかる。さらに人４が懐中電灯を持って戻ってきたら合計２０分かかることになる。橋を１７分以内に渡ることはできるか？
+
+class CrossingBridge
+
+values
+ public 各自所要時間 = {1|->1, 2|->2, 3|->5, 4|->10};
+
+types
+ public 人番号 = nat
+   inv p == p in set {1,2,3,4};
+
+ public 所要時間 = nat;
+
+functions
+
+  public time2cross : set of 人番号 -> 所要時間
+  time2cross(ps) ==
+    let 最も遅い人 in set ps be st
+            forall p in set ps & 各自所要時間(最も遅い人) >= 各自所要時間(p)
+        in 各自所要時間(最も遅い人);
+
+  public 累計時間 : seq of set of 人番号 -> 所要時間
+  累計時間(履歴) == if len 履歴 = 0 then
+                       0
+                    else
+                       time2cross(hd 履歴) + 累計時間(tl 履歴);
+
+  public 行き : set of 人番号 * set of 人番号 * seq of set of 人番号
+                                                      -> set of seq of set of 人番号
+  行き(岸1, 岸2, 履歴) ==
+       let 候補集合 = {p|p in set power 岸1 & (card p = 1)or(card p = 2)} in
+           dunion { if p1 = 岸1 then
+                       {履歴 ^ [p1]}
+                    else
+                       帰り(岸1\p1, 岸2 union p1, 履歴 ^ [p1])
+                    | p1 in set 候補集合 & 累計時間(履歴 ^ [p1]) <= 17};
+           
+  public 帰り : set of 人番号 * set of 人番号 * seq of set of 人番号
+                                                      -> set of seq of set of 人番号
+  帰り(岸1, 岸2, 履歴) ==
+       let 候補集合 = {p|p in set power 岸2 & (card p = 1)or(card p = 2)} in
+           dunion { 行き(岸1 union p1, 岸2\p1, 履歴 ^ [p1])
+                    | p1 in set 候補集合 & 累計時間(履歴 ^ [p1]) <= 17};
+
+  public solve_f : () -> set of seq of set of 人番号
+  solve_f() == 行き({1,2,3,4}, {}, [])
+    post 
+      let 結果集合 = RESULT in
+          forall 結果 in set 結果集合 & 累計時間(結果) <= 17;
+
+operations
+
+  -- VDMTools インタプリタ画面からの実行方法
+  -- >> init
+  -- >> cr t := new CrossingBridge()
+  -- >> print t.solve()
+  public solve : () ==> set of seq of set of 人番号
+  solve() == solve_f();
+                                
+end CrossingBridge
+
+
+
