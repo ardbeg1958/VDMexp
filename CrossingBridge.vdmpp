@@ -52,7 +52,7 @@ functions
   帰り(岸1, 岸2, 履歴) ==
        let 候補集合 = {p|p in set power 岸2 & (card p = 1)or(card p = 2)} in
            dunion { 行き(岸1 union p1, 岸2\p1, 履歴 ^ [p1])
-                    | p1 in set 候補集合 & 累計時間(履歴 ^ [p1]) <= 17};
+                    | p1 in set 候補集合 & 累計時間(履歴 ^ [p1]) < 17};
 
   public solve_f : () -> set of seq of set of 人番号
   solve_f() == 行き({1,2,3,4}, {}, [])
@@ -67,7 +67,7 @@ operations
   -- >> cr t := new CrossingBridge()
   -- >> print t.solve()
   public solve : () ==> set of seq of set of 人番号
-  solve() == solve_f();
+  solve() == return solve_f();
                                 
 end CrossingBridge
 

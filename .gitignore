@@ -1,3 +1,5 @@
 *.class
 *.*~
 CrossingBridge.java
+
+*.bak
