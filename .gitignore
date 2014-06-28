@@ -3,3 +3,7 @@
 CrossingBridge.java
 
 *.bak
+
+*.opt
+
+*.wgm
